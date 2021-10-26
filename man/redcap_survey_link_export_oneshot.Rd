@@ -2,7 +2,7 @@
 % Please edit documentation in R/redcap-survey-link-export-oneshot.R
 \name{redcap_survey_link_export_oneshot}
 \alias{redcap_survey_link_export_oneshot}
-\title{Download a file from a REDCap project record}
+\title{Export a survey link for a participant}
 \usage{
 redcap_survey_link_export_oneshot(
   redcap_uri,
@@ -10,6 +10,7 @@ redcap_survey_link_export_oneshot(
   record,
   instrument,
   event = "",
+  repeat_instance = "1",
   verbose = TRUE,
   config_options = NULL
 )
@@ -28,6 +29,10 @@ survey link.  Required}
 
 \item{event}{The name of the event where the file is saved in REDCap.
 Optional}
+
+\item{repeat_instance}{(only for projects with repeating instruments/events)
+The repeat instance number of the repeating event (if longitudinal) or the
+repeating instrument (if classic or longitudinal). Default value is '1'.}
 
 \item{verbose}{A boolean value indicating if \code{message}s should be printed
 to the R console during the operation.  Optional.}
@@ -56,7 +61,8 @@ the name stored in REDCap is used (which is the default).
 }
 }
 \description{
-This function uses REDCap's API to download a file.
+This function uses REDCap's API to fetch a unique survey link to
+collect responses from participants.
 }
 \details{
 Currently, the function doesn't modify any variable types to conform to
@@ -65,7 +71,8 @@ function that checks for some common important conflicts.
 
 \strong{Permissions Required}
 To use this method, you must have API Export privileges in the project.
-(As stated in the 9.0.0 documentation.)
+(As stated in the 9.0.0 documentation.) Additionally, the user must have
+Survey Distribution Tools privileges.
 }
 \examples{
 \dontrun{

@@ -1,6 +1,7 @@
-#' @title Download a file from a REDCap project record
+#' @title Export a survey link for a participant
 #'
-#' @description This function uses REDCap's API to download a file.
+#' @description This function uses REDCap's API to fetch a unique survey link to
+#' collect responses from participants.
 #'
 #' @param redcap_uri The URI (uniform resource identifier) of the REDCap
 #' project.  Required.
@@ -11,6 +12,9 @@
 #' survey link.  Required
 #' @param event The name of the event where the file is saved in REDCap.
 #' Optional
+#' @param repeat_instance (only for projects with repeating instruments/events)
+#' The repeat instance number of the repeating event (if longitudinal) or the
+#' repeating instrument (if classic or longitudinal). Default value is '1'.
 #' @param verbose A boolean value indicating if `message`s should be printed
 #' to the R console during the operation.  Optional.
 #' @param config_options  A list of options to pass to [httr::POST()] method
@@ -40,7 +44,8 @@
 #'
 #' **Permissions Required**
 #' To use this method, you must have API Export privileges in the project.
-#' (As stated in the 9.0.0 documentation.)
+#' (As stated in the 9.0.0 documentation.) Additionally, the user must have
+#' Survey Distribution Tools privileges.
 #'
 #' @author Will Beasley
 #'
@@ -76,28 +81,32 @@ redcap_survey_link_export_oneshot <- function(
   record,
   instrument,
   event           = "",
+  repeat_instance = '1',
   verbose         = TRUE,
   config_options  = NULL
 ) {
-
-  checkmate::assert_character(redcap_uri, any.missing=FALSE, len=1, pattern="^.{1,}$")
-  checkmate::assert_character(token     , any.missing=FALSE, len=1, pattern="^.{1,}$")
   record  <- as.character(record)
-  checkmate::assert_character(record    , any.missing=FALSE, len=1, pattern="^.{1,}$")
-  checkmate::assert_character(instrument, any.missing=FALSE, len=1, pattern="^.{1,}$")
-  checkmate::assert_character(event     , any.missing=FALSE, len=1, pattern="^.{0,}$")
-  checkmate::assert_logical(  verbose   , any.missing=FALSE)
+  repeat_instance <- as.character(repeat_instance)
+
+  checkmate::assert_character(redcap_uri     , any.missing=FALSE, len=1, pattern="^.{1,}$")
+  checkmate::assert_character(token          , any.missing=FALSE, len=1, pattern="^.{1,}$")
+  checkmate::assert_character(record         , any.missing=FALSE, len=1, pattern="^.{1,}$")
+  checkmate::assert_character(instrument     , any.missing=FALSE, len=1, pattern="^.{1,}$")
+  checkmate::assert_character(event          , any.missing=FALSE, len=1, pattern="^.{0,}$")
+  checkmate::assert_character(repeat_instance, any.missing=FALSE, len=1, pattern="^\\d{0,1}$")
+  checkmate::assert_logical(  verbose        , any.missing=FALSE)
 
   token   <- sanitize_token(token)
   verbose <- verbose_prepare(verbose)
 
   post_body <- list(
-    token         = token,
-    content       = "surveyLink",
-    record        = record,
-    instrument    = instrument,
-    event         = event,
-    returnFormat  = "csv"
+    token           = token,
+    content         = "surveyLink",
+    record          = record,
+    instrument      = instrument,
+    event           = event,
+    repeat_instance = repeat_instance,
+    returnFormat    = "csv"
   )
 
   if (0L < nchar(event)) post_body$event <- event
