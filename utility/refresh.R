@@ -12,13 +12,16 @@ devtools::build_vignettes()
 
 checks_to_exclude <- c(
   "covr",
-  "cyclocomp",
+  # "cyclocomp"#,
   "lintr_line_length_linter"
 )
 gp <-
   goodpractice::all_checks() |>
   purrr::discard(~(. %in% checks_to_exclude)) |>
-  goodpractice::gp()
+  {
+    \(checks)
+    goodpractice::gp(checks = checks)
+  }()
 goodpractice::results(gp)
 gp
 
@@ -29,10 +32,12 @@ pkgdown::build_site()
 
 devtools::run_examples(); #dev.off() #This overwrites the NAMESPACE file too
 # devtools::run_examples(, "redcap_read.Rd")
+# pkgload::load_all()
 test_results_checked <- devtools::test()
-test_results_checked <- devtools::test(filter = "write-error")
-test_results_checked <- devtools::test(filter = "report")
-test_results_checked <- devtools::test(filter = "validate.*$")
+test_results_checked <- devtools::test(filter = "read-decimal-comma")
+test_results_checked <- devtools::test(filter = "delete")
+withr::local_envvar(ONLYREADTESTS = "true")
+test_results_checked <- devtools::test(filter = "write-batch")
 
 # testthat::test_dir("./tests/")
 test_results_not_checked <- testthat::test_dir("./tests/manual/")
